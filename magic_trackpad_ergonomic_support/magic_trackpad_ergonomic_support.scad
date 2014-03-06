@@ -23,7 +23,7 @@
 angle = 10; // [5:45]
 
 // Which hand you use for the trackpad
-handed = "left"; // [right,left]
+handed = "right"; // [right,left]
 
 /* [Hidden] */
 
@@ -46,13 +46,13 @@ module round_corner($fn=25) {
 
 module lower_wall(d, $fn=25) {
     hull() {
-        cube([3,1,5]);
-        translate([1.5,0,5.5]) rotate([0,90,90]) cylinder(r=1.5,h=d-15);
+        cube([3,1,6]);
+        translate([1.5,0,6.5]) rotate([0,90,90]) cylinder(r=1.5,h=d-15);
         intersection() {
-            cube([3,d,7]);
+            cube([3,d,8]);
             translate([1.5,d-16,-5]) rotate([0,90,0])
                 rotate_extrude(convexity = 10, $fn=25)
-                translate([10.5, 0, 0])
+                translate([11.5, 0, 0])
                 circle(r = 1.5);
         }
     }
