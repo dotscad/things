@@ -26,6 +26,11 @@
  * @source     https://github.com/dotscad/things/blob/master/wooden_train_whistle_jig/wooden_train_whistle_jig.scad
  */
 
+use <../../dotscad/pie.scad>;
+use <../dotscad/pie.scad>;
+use <dotscad/pie.scad>;
+use <pie.scad>;
+
 //
 // Customizer parameters and rendering
 //
@@ -34,6 +39,7 @@
 
 // mm diameter of the whistle tube hole.  Larger measurements are useful if you intend to strengthen the hole with metal tubing.
 bore = 12.7; // [19.05:3/4", 12.7:1/2", 9.525:3/8"]
+// note: comes out at around 11.9
 
 // mm thickness of the base (longer means a better guide hole).
 base=20;
@@ -46,47 +52,48 @@ w = 40;
 
 /* [Hidden] */
 
-h = 65;  // height of the entire jig
+h = 75;  // height of the entire jig -- taller means more control
 
 point_max = 12.7/2; // Radius of the large end of the center point guide hole.
-point_min = .75;    // Radius of the small end of the center point guide hole.
+point_min = 1;      // Radius of the small end of the center point guide hole.
 
 mouthpiece_cut = 25.4; // 1" - thickness of the mouthpiece to cut off
 
+cap_width = 15.875; // 5/8"
+
 module jig($fn=50) {
     o=.1;
+    bore_fuzz = .5; // a little extra radius to account for shrinkage
+    cutout_fuzz = 1; // offset for PLA shrinkage and pencil width
     difference() {
         translate([-wall-w/2,-wall-w/2,-base])
-        difference() {
-            cube([w+wall*2,w+wall*2,h]);
-            translate([wall,wall,base]) cube([w,w,h+o]);
-            // Guides for marking drill points
-            translate([wall + w*.25,wall + w*.25,-o]) cylinder(r1=point_max, r2=point_min, h=base+o*2);
-            translate([wall + w*.75,wall + w*.75,-o]) cylinder(r1=point_max, r2=point_min, h=base+o*2);
-            translate([wall + w*.5,wall + w*.5,-o]) cylinder(r1=point_max, r2=point_min, h=base+o*2);
-            // Actual drill guides (need to find metal tubing for this...)
-            // steve actually puts these 3/8" in rather than centered...
-            translate([wall + w*.75,wall + w*.25,-o]) cylinder(r=bore/2, h=base+o*2);
-            translate([wall + w*.25,wall + w*.75,-o]) cylinder(r=bore/2, h=base+o*2);
-        }
-
-        // mouthpiece depth cut
-        rotate([0,0,45]) translate([0,-w*sqrt(2)/3,mouthpiece_cut]) cutout();
-        // whistle hole cuts
-        rotate([0,0,135]) translate([0,-w*sqrt(2)/4,0]) cutout();
-        rotate([0,0,-45]) translate([0,-w*sqrt(2)/4,0]) cutout();
+            difference() {
+                cube([w+wall*2,w+wall*2,h]);
+                translate([wall,wall,base]) cube([w,w,h+o]);
+                // Guides for marking drill points
+                translate([wall + w*.25,wall + w*.25,-o]) cylinder(r1=point_max, r2=point_min, h=base+o*2);
+                translate([wall + w*.75,wall + w*.75,-o]) cylinder(r1=point_max, r2=point_min, h=base+o*2);
+                translate([wall + w*.5,wall + w*.5,-o]) cylinder(r1=point_max, r2=point_min, h=base+o*2);
+                // Actual drill guides (need to find metal tubing for this...)
+                translate([wall + w*.75,wall + w*.25,-o]) cylinder(r=bore/2+bore_fuzz, h=base+o*2);
+                translate([wall + w*.25,wall + w*.75,-o]) cylinder(r=bore/2+bore_fuzz, h=base+o*2);
+            }
+        // whistle "window" hole cuts
+        rotate([0,0,135]) translate([0,-w*sqrt(2)/4+cutout_fuzz,cap_width]) window_cutout();
+        rotate([0,0,-45]) translate([0,-w*sqrt(2)/4+cutout_fuzz,cap_width]) window_cutout();
+        // mouthpiece depth cut -- can just reuse the window cutout here.
+        rotate([0,0,45]) translate([0,-w*sqrt(2)/3,mouthpiece_cut]) window_cutout();
+        // Bevel the bottom edge
+        translate([0,w/2+wall,-base]) rotate([45,0,0]) cube([2*w,wall,wall], center=true);
+        translate([0,-w/2-wall,-base]) rotate([45,0,0]) cube([2*w,wall,wall], center=true);
+        translate([w/2+wall,0,-base]) rotate([45,0,90]) cube([2*w,wall,wall], center=true);
+        translate([-w/2-wall,0,-base]) rotate([45,0,90]) cube([2*w,wall,wall], center=true);
     }
 }
 
-module cutout() {
-    // cutouts
-	width = w;
-	len    = width*2;
-	translate([0,-width/sqrt(2),0])
-		difference() {
-			rotate([45,0,0]) cube([len,width,width], center=true);
-			translate([0,0,-width]) cube([len * 2,width * 2, width * 2], center=true);
-		}
+module window_cutout($fn=6) {
+    angle = atan(.75 / (3/8 * sqrt(2))); // ~ 54.74 degrees
+	translate([w,0,0]) rotate([0,-90,0]) pie(w, angle, w*2, -90);
 }
 
 jig();
