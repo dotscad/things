@@ -39,13 +39,15 @@ use <pie.scad>;
 
 // mm diameter of the whistle tube hole.  Larger measurements are useful if you intend to strengthen the hole with metal tubing.
 bore = 12.7; // [19.05:3/4", 12.7:1/2", 9.525:3/8"]
+bore2 = 19.05; // [19.05:3/4", 12.7:1/2", 9.525:3/8"]
+bore3 = 9.525; // [19.05:3/4", 12.7:1/2", 9.525:3/8"]
 // note: comes out at around 11.9
 
 // mm thickness of the base (longer means a better guide hole).
 base=20;
 
 // mm thickness of the wall that will hold the wood in place on the jig.
-wall=3;
+wall=2.5;
 
 // mm width of the wood (1.5" is 38.1mm but measurements suggest leaving some extra room)
 w = 40;
@@ -61,9 +63,9 @@ mouthpiece_cut = 25.4; // 1" - thickness of the mouthpiece to cut off
 
 cap_width = 15.875; // 5/8"
 
-module jig($fn=50) {
+module jig($fn=75) {
     o=.1;
-    bore_fuzz = .5; // a little extra radius to account for shrinkage
+    bore_fuzz = .3; // a little extra radius to account for shrinkage
     cutout_fuzz = 1; // offset for PLA shrinkage and pencil width
     difference() {
         translate([-wall-w/2,-wall-w/2,-base])
@@ -72,11 +74,12 @@ module jig($fn=50) {
                 translate([wall,wall,base]) cube([w,w,h+o]);
                 // Guides for marking drill points
                 translate([wall + w*.25,wall + w*.25,-o]) cylinder(r1=point_max, r2=point_min, h=base+o*2);
-                translate([wall + w*.75,wall + w*.75,-o]) cylinder(r1=point_max, r2=point_min, h=base+o*2);
                 translate([wall + w*.5,wall + w*.5,-o]) cylinder(r1=point_max, r2=point_min, h=base+o*2);
-                // Actual drill guides (need to find metal tubing for this...)
+                //translate([wall + w*.75,wall + w*.75,-o]) cylinder(r1=point_max, r2=point_min, h=base+o*2);
+                // Actual drill guides
                 translate([wall + w*.75,wall + w*.25,-o]) cylinder(r=bore/2+bore_fuzz, h=base+o*2);
-                translate([wall + w*.25,wall + w*.75,-o]) cylinder(r=bore/2+bore_fuzz, h=base+o*2);
+                translate([wall + w*.25,wall + w*.75,-o]) cylinder(r=bore2/2+bore_fuzz, h=base+o*2);
+                translate([wall + w*.75,wall + w*.75,-o]) cylinder(r=bore3/2+bore_fuzz, h=base+o*2);
             }
         // whistle "window" hole cuts
         rotate([0,0,135]) translate([0,-w*sqrt(2)/4+cutout_fuzz,cap_width]) window_cutout();
