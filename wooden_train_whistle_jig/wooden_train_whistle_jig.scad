@@ -65,8 +65,8 @@ cap_width = 15.875; // 5/8"
 
 module jig($fn=75) {
     o=.1;
-    bore_fuzz = .3; // a little extra radius to account for shrinkage
-    cutout_fuzz = 1; // offset for PLA shrinkage and pencil width
+    bore_fuzz = .2;   // a little extra radius to account for shrinkage
+    cutout_fuzz = .5; // offset for PLA shrinkage and pencil width
     difference() {
         translate([-wall-w/2,-wall-w/2,-base])
             difference() {
