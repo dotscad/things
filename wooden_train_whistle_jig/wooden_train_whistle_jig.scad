@@ -41,7 +41,6 @@ use <pie.scad>;
 bore = 12.7; // [19.05:3/4", 12.7:1/2", 9.525:3/8"]
 bore2 = 19.05; // [19.05:3/4", 12.7:1/2", 9.525:3/8"]
 bore3 = 9.525; // [19.05:3/4", 12.7:1/2", 9.525:3/8"]
-// note: comes out at around 11.9
 
 // mm thickness of the base (longer means a better guide hole).
 base=20;
@@ -65,7 +64,7 @@ cap_width = 15.875; // 5/8"
 
 module jig($fn=75) {
     o=.1;
-    bore_fuzz = .2;   // a little extra radius to account for shrinkage
+    bore_fuzz = .25;  // a little extra radius to account for shrinkage
     cutout_fuzz = .5; // offset for PLA shrinkage and pencil width
     difference() {
         translate([-wall-w/2,-wall-w/2,-base])
