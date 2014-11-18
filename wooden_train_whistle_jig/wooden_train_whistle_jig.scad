@@ -38,9 +38,10 @@ use <pie.scad>;
 /* [Global] */
 
 // mm diameter of the whistle tube hole.  Larger measurements are useful if you intend to strengthen the hole with metal tubing.
-bore = 9.525; // [19.05:3/4", 12.7:1/2", 9.525:3/8"]
-bore2 = 12.7; // [19.05:3/4", 12.7:1/2", 9.525:3/8"]
-bore3 = 19.05; // [19.05:3/4", 12.7:1/2", 9.525:3/8"]
+bore = 12.7; // [12.7:1/2", 9.525:3/8"]
+
+// Whether or not to add a single hole for a 3/4" metal guide collar
+bore_collar = false; // [false, 19.05:3/4"]
 
 // mm thickness of the base (longer means a better guide hole).
 base=20;
@@ -66,12 +67,8 @@ module jig($fn=75) {
     o=.1;
     bore_fuzz = .25;  // a little extra radius to account for shrinkage
     cutout_fuzz = .5; // offset for PLA shrinkage and pencil width
-    rbore1 = bore/2 + bore_fuzz; // radius for bore size 1
-    rbore2 = bore2/2 + bore_fuzz; // radius for bore size 2
-    rbore3 = bore3/2 + bore_fuzz; // radius for bore size 3
-    offset1 = (w - 4*rbore1) / 3; // wall offset for bore size 1
-    offset2 = (w - 4*rbore2) / 3; // wall offset for bore size 2
-    offset3 = (w - 4*rbore3) / 3; // wall offset for bore size 3
+    rbore = bore/2 + bore_fuzz; // radius for bore
+    offset = (w - 4*rbore) / 3; // wall offset for bore
     difference() {
         translate([-wall-w/2,-wall-w/2,-base])
             difference() {
@@ -79,13 +76,15 @@ module jig($fn=75) {
                 translate([wall,wall,base]) cube([w,w,h+o]);
                 // Guides for marking drill points
                 translate([wall + w*.5,wall + w*.5,-o]) cylinder(r1=point_max, r2=point_min, h=base+o*2);
-                // Need to pick which offset we want here...  No need for bore3 since that's not a drill point
-                //translate([wall + offset1 + rbore1,wall + offset1 + rbore1,-o]) cylinder(r1=point_max, r2=point_min, h=base+o*2);
-                translate([wall + offset2 + rbore2,wall + offset2 + rbore2,-o]) cylinder(r1=point_max, r2=point_min, h=base+o*2);
+                translate([wall + offset + rbore, wall + offset + rbore, -o]) cylinder(r1=point_max, r2=point_min, h=base+o*2);
+                translate([wall + offset*2 + rbore*3, wall + offset*2 + rbore*3, -o]) cylinder(r1=point_max, r2=point_min, h=base+o*2);
                 // Actual drill guides
-                translate([wall + offset1*2 + rbore1*3,wall + offset1 + rbore1,-o]) cylinder(r=rbore1, h=base+o*2);
-                translate([wall + offset2 + rbore2,wall + offset2*2 + rbore2*3,-o]) cylinder(r=rbore2, h=base+o*2);
-                translate([wall + offset3*2 + rbore3*3,wall + offset3*2 + rbore3*3,-o]) cylinder(r=rbore3, h=base+o*2);
+                translate([wall + offset*2 + rbore*3, wall + offset + rbore, -o]) cylinder(r=rbore, h=base+o*2);
+                translate([wall + offset + rbore, wall + offset*2 + rbore*3,-o]) cylinder(r=rbore, h=base+o*2);
+                // If adding a hole for the metal guide, just overwrite one of the drill guildes
+                if (bore_collar) {
+	                translate([wall + offset*2 + rbore*3, wall + offset + rbore, -o]) cylinder(r=bore_collar/2 + bore_fuzz, h=base+o*2);
+                }
             }
         // whistle "window" hole cuts
         rotate([0,0,135]) translate([0,-w*sqrt(2)/4+cutout_fuzz,cap_width]) window_cutout();
