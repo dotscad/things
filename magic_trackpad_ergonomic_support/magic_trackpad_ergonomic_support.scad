@@ -25,6 +25,12 @@ angle = 10; // [5:45]
 // Which hand you use for the trackpad
 handed = "right"; // [right,left]
 
+// Add wrist rest to model
+wrist_rest = "no"; // [yes,no]
+
+// Length of the wrist rest (cm)
+wrist_rest_length = 8; // [0:12]
+
 /* [Hidden] */
 
 // A global overlap variable (to prevent printing glitches)
@@ -70,9 +76,10 @@ module back_wall(d, angle, $fn=25) {
 
 module trackpad_platform(angle, handed) {
     d = (13 * 10) + 3; // 13cm on a side, plus a little fudge for the wall
+    wp = (wrist_rest == "yes") ? (wrist_rest_length * 10) + 3 : 0; // Convert cm to mm, add a litle fudge, 0 if no wrist rest
     difference() {
         union() {
-            // platform walls
+            // Platform walls
             rotate([0,-angle,0]) union() {
                 if (handed == "right") {
                     translate([0,-2,0]) back_wall(d, angle);
@@ -83,15 +90,21 @@ module trackpad_platform(angle, handed) {
                     translate([3,d,0]) rotate([0,0,180]) lower_wall(d);
                 }
             }
+
             difference() {
-                // base
+                // Base
                 difference() {
-                    translate([0,(handed == "right" ? -2 : 0),o]) difference() {
-                        cube([d,d+2,d]);
+                    translate([0,(handed == "right" ? -2 : -wp),o]) difference() {
+                        cube([d,d+2+wp,d]);
                         rotate([0,-angle,0]) translate([-o,-o,2]) cube([d*2,d*2,d*2]);
                     }
-                    translate([cos(angle)*23,(handed == "right" ? d-30 : -5),-o])
-                        cube([cos(angle)*(d-23)-cos(angle)*20, 40, 200]);
+
+                    if (wrist_rest == "no") {
+                      // Front cutout
+                      translate([cos(angle)*23,(handed == "right" ? d-30 : -5),-o])
+                            cube([cos(angle)*(d-23)-cos(angle)*20, 40, 200]);
+                    }
+
                     translate([0,(handed == "right" ? 8+10 : -10+35),-o]) hull() {
                         for(t = [ [3+5+cos(angle)*10,0,0],
                                   [3+5+cos(angle)*10,d-43,0],
@@ -102,32 +115,50 @@ module trackpad_platform(angle, handed) {
                         }
                     }
                 }
+
                 // Rounded edges
-                if (handed == "right") {
-                    for (tr=[ [ [0,d,-o],                    [0,0,-90] ],
-                              [ [cos(angle)*d,d,-o],         [0,0,180] ],
-                              [ [cos(angle)*(d-20),d,-o],    [0,0,-90] ],
-                              [ [cos(angle)*(20+3),d,-o],    [0,0,180] ],
-                              [ [cos(angle)*(20+3),d-20,-o], [0,0,90]  ],
-                              [ [cos(angle)*(d-20),d-20,-o], [0,0,0]   ],
-                            ] ) {
-                        translate(tr[0]) rotate(tr[1]) round_corner();
+                if (wrist_rest == "yes") {
+                    // If adding wrist rest, we only want to round the bottom left and right corners
+                    if (handed == "right") {
+                        for (tr=[ [ [0,d+wp,-o],            [0,0,-90] ],
+                                  [ [cos(angle)*d,d+wp,-o], [0,0,180] ],
+                                ] ) {
+                            translate(tr[0]) rotate(tr[1]) round_corner();
+                        }
+                    } else {
+                        for (tr=[ [ [0,-wp,-o],            [0,0,0]  ],
+                                  [ [cos(angle)*d,-wp,-o], [0,0,90] ], 
+                                ] ) {
+                            translate(tr[0]) rotate(tr[1]) round_corner();
+                        }
                     }
-                }
-                else {
-                    for (tr=[ [ [0,0,-o],                           [0,0,0]   ],
-                              [ [cos(angle)*d,0,-o],                [0,0,90]  ],
-                              [ [cos(angle)*d-cos(angle)*20,0,-o],  [0,0,0]   ],
-                              [ [cos(angle)*(20+3),0,-o],           [0,0,90]  ],
-                              [ [cos(angle)*(20+3),20,-o],          [0,0,180] ],
-                              [ [cos(angle)*d-cos(angle)*20,20,-o], [0,0,-90] ],
-                            ] ) {
-                        translate(tr[0]) rotate(tr[1]) round_corner();
+                } else {
+                    // Without the wrist rest, we want to round all corners of each side
+                    if (handed == "right") {
+                        for (tr=[ [ [0,d,-o],                    [0,0,-90] ],
+                                  [ [cos(angle)*d,d,-o],         [0,0,180] ],
+                                  [ [cos(angle)*(d-20),d,-o],    [0,0,-90] ],
+                                  [ [cos(angle)*(20+3),d,-o],    [0,0,180] ],
+                                  [ [cos(angle)*(20+3),d-20,-o], [0,0,90]  ],
+                                  [ [cos(angle)*(d-20),d-20,-o], [0,0,0]   ],
+                                ] ) {
+                            translate(tr[0]) rotate(tr[1]) round_corner();
+                        }
+                    } else {
+                        for (tr=[ [ [0,0,-o],                           [0,0,0]   ],
+                                  [ [cos(angle)*d,0,-o],                [0,0,90]  ],
+                                  [ [cos(angle)*d-cos(angle)*20,0,-o],  [0,0,0]   ],
+                                  [ [cos(angle)*(20+3),0,-o],           [0,0,90]  ],
+                                  [ [cos(angle)*(20+3),20,-o],          [0,0,180] ],
+                                  [ [cos(angle)*d-cos(angle)*20,20,-o], [0,0,-90] ],
+                                ] ) {
+                            translate(tr[0]) rotate(tr[1]) round_corner();
+                        }
                     }
                 }
             }
         }
         // Max-width cutoff
-        translate([cos(angle)*d,-d/2,-d/2]) cube([d*2,d*2,d*2]);
+        translate([cos(angle)*d,-d,-d/2]) cube([d*2,d*3,d*2]);
     }
 }
