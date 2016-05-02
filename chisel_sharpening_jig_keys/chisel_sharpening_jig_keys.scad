@@ -12,44 +12,64 @@
  * @license    http://creativecommons.org/licenses/LGPL/2.1/
  * @license    http://creativecommons.org/licenses/by-sa/3.0/
  *
- * @see        http://www.thingiverse.com/thing:xxxx
+ * @see        http://www.thingiverse.com/thing:1534264
  * @source     https://github.com/dotscad/things/blob/master/chisel_sharpening_jig_keys/chisel_sharpening_jig_keys.scad
  */
 
-// A global overlap variable (to prevent printing glitches)
-$o = .1;
+/* ******************************************************************************
+ * Thingiverse Customizer parameters and rendering.
+ * ****************************************************************************** */
 
-// 
+/* [Global] */
+
+// Measurements are based on jig recommendations
 
 type = "Chisel"; // ["Chisel", "Plane"]
+
 angle = 30; // [30, 25]
+
+/* [Hidden] */
 
 // chisel: 30° = 30mm, 25° = 40mm
 // plane: 30° = 38mm, 25° = 50mm
 size = (type == "Chisel") ? (angle == 30 ? 30 : 40) : (angle == 30 ? 38 : 50);
 
 h = 52; // 2 inches
+
 wall=3; // because it seems to work
+
 text_depth = .3  * 2; // set to a ratio of your extruder width
 
-rotate([0,-90,0])
-difference() {
-    union() {
-        cube([h, size + .1, wall]);
-        translate([0,size, 0])
-            cube([h, wall, 5+wall]);
-        translate([0,0,-15+$o])
-            cube([h, wall, 15+$o]);
-        *translate([0,0, 0])
-            cube([wall, size, 10]);
+// A global overlap variable (to prevent printing glitches)
+$o = .1;
+
+// Render the part
+chisel_sharpening_jig_key();
+
+/* ******************************************************************************
+ * Main module code below:
+ * ****************************************************************************** */
+
+module chisel_sharpening_jig_key() {
+    rotate([0,-90,0])
+    difference() {
+        union() {
+            cube([h, size + .1, wall]);
+            translate([0,size, 0])
+                cube([h, wall, 5+wall]);
+            translate([0,0,-15+$o])
+                cube([h, wall, 15+$o]);
+            *translate([0,0, 0])
+                cube([wall, size, 10]);
+        }
+
+        translate([1.5,5,wall-text_depth])
+            rotate([0,0,0])
+            linear_extrude(height = 2)
+            text(str(angle, "°", type), size=8.5, valign="bottom", font="Liberation Sans", $fn=50);
+        translate([9,18,wall-text_depth])
+            rotate([0,0,0])
+            linear_extrude(height = 2)
+            text(str(size, "mm"), size=8.5, valign="bottom", font="Liberation Sans", $fn=50);
     }
-    
-    translate([1.5,5,wall-text_depth])
-        rotate([0,0,0])
-        linear_extrude(height = 2)
-        text(str(angle, "°", type), size=8.5, valign="bottom", font="Liberation Sans", $fn=50);
-    translate([9,18,wall-text_depth])
-        rotate([0,0,0])
-        linear_extrude(height = 2)
-        text(str(size, "mm"), size=8.5, valign="bottom", font="Liberation Sans", $fn=50);
 }
