@@ -14,6 +14,7 @@ Print test parts to dial in the proper diameter:
 3. Set the `diffuser_type` to `None`.
 4. Set any additional configuration properties that you want.
 5. Print your part and test the fit of the slip-on ring.
+6. Repeat until the slip-on ring fits.
 
 Once you have a good fit for the ring, set the `diffuser_type` value back to `Dome` and print your final product.
 
