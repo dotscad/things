@@ -118,9 +118,9 @@ module dome_diffuser(radius, top_r, top_fillet, wall, height) {
 
 // Inner diffuser, since many LED flashlights are too focused and need to be spread out even more.
 module inner_diffuser(radius, additional_crop=0) {
-    // could pass in a wall thickness, but we actually want this a specific
+    // could pass in a wall thickness, but we actually want this to be a specific
     // thickness, not dependent on overall shape radius.
-    wall = 1;
+    wall = 1 * sqrt(2);
     difference() {
         // Top surface
         cylinder(r1=radius, r2=0, h=radius);
