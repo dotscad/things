@@ -20,7 +20,7 @@
 /* [Global] */
 
 // Inner diameter of the diffuser (e.g. 15.33 fits my Fenix LD02 AAA light)
-diameter = 37;
+diameter = 15.33;
 
 // Height of the sleeve that fits over the end of the flashlight
 sleeve_height = 12;
@@ -29,13 +29,13 @@ sleeve_height = 12;
 diffuser_type = "Dome"; // [Dome, None]
 
 // Flat Top radius (set to 0 for a round dome)
-top_radius = 0;
+top_radius = 7.5;
 
 // Fillet roundover for the flat top;
 top_fillet = 2;
 
 // Height of the diffuser (in case you want to make a tall one)
-diffuser_height = 25;
+diffuser_height = 20;
 
 // Visual cutout to show internal structure
 cross_section = false; // [true, false]
