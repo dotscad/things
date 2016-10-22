@@ -17,7 +17,7 @@
  * Thingiverse Customizer parameters and rendering.
  * ****************************************************************************** */
 
-/* [Global] */
+/* ** Global tab is disabled because Customizer is broken ** [Global] */
 
 // Inner diameter of the diffuser (e.g. 15.33 fits my Fenix LD02 AAA light)
 diameter = 15.33;
@@ -25,17 +25,17 @@ diameter = 15.33;
 // Height of the sleeve that fits over the end of the flashlight
 sleeve_height = 12;
 
+// Height of the diffuser (in case you want to make a tall one)
+diffuser_height = 20;
+
 // Type of diffuser to print (accepting pull requests for more).  Use None for testing diameter.
 diffuser_type = "Dome"; // [Dome, None]
 
 // Flat Top radius (set to 0 for a round dome)
 top_radius = 7.5;
 
-// Fillet roundover for the flat top;
+// Fillet roundover for the flat top
 top_fillet = 2;
-
-// Height of the diffuser (in case you want to make a tall one)
-diffuser_height = 20;
 
 // Visual cutout to show internal structure
 cross_section = false; // [true, false]
@@ -117,18 +117,29 @@ module dome_diffuser(radius, top_r, top_fillet, wall, height) {
 }
 
 // Inner diffuser, since many LED flashlights are too focused and need to be spread out even more.
-module inner_diffuser(radius, additional_crop=0) {
-    // could pass in a wall thickness, but we actually want this to be a specific
-    // thickness, not dependent on overall shape radius.
-    wall = 1 * sqrt(2);
+module inner_diffuser(radius, wall) {
+    // Calculate the necessary radius value
+    outer_r = radius + wall;
+    // We don't want thickness to match the outer wall, just be as thin as
+    // necessary to be strong but diffuse light.
+    thickness = 1;
+    // Calculate the height and top radius, based on the top of an octagon,
+    // which should give us a 45 degree slope and a radius that matches the
+    // top of the
+    height = outer_r / (2 + sqrt(2));
+    top_r = sqrt(2) * height;
     difference() {
-        // Top surface
-        cylinder(r1=radius, r2=0, h=radius);
-        // Inner surface
-        translate([0,0,-wall]) cylinder(r1=radius, r2=0, h=radius);
+        union() {
+            // Top surface
+            cylinder(r1=outer_r, r2=top_r, h=height);
+            // Reinforcement to protect against jamming the diffuser on too hard
+            translate([0,0,-thickness]) cylinder(r=outer_r, h=1+thickness);
+        }
+        // Lower surface
+        translate([0,0,-thickness-$o]) cylinder(r1=outer_r, r2=top_r, h=height);
         // Poke a tiny hole through the center of this to prevent it from closing off the
         // inner core of the diffuser such that some slicers would allow it to be filled in.
-        cylinder(r=.0001, h=radius+$o);
+        //cylinder(r=.0001, h=radius+$o);
     }
 }
 
@@ -156,8 +167,8 @@ module diffuser(radius, top_radius, top_fillet, sleeve_height, diffuser_type, di
                     dome_diffuser(outer_r, top_r, top_fillet, wall, diffuser_height);
             // Internal diffuser
             if (diffuser_type != "None")
-                translate([0,0,sleeve_height-stop_r])
-                    inner_diffuser(outer_r-$o, stop_r);
+                translate([0,0,sleeve_height-bump_r])
+                    inner_diffuser(radius, wall);
             // Sleeve
             difference() {
                 cylinder(r=outer_r, h=sleeve_height+$o);
@@ -180,7 +191,8 @@ module diffuser(radius, top_radius, top_fillet, sleeve_height, diffuser_type, di
                             }
                         }
                     // A stop, so you don't press it on too far (also reinforces the internal diffuser)
-                    translate([0,0,sleeve_height - .8]) rotate_extrude()
+                    // Commented out because the inner diffuser performs this function.
+                    *translate([0,0,sleeve_height - .8]) rotate_extrude()
                         translate([inner_r, -sqrt(2)*stop_r/2]) hull() {
                             rotate(45) square(stop_r);
                             translate([0,.8]) rotate(45) square(stop_r);
