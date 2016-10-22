@@ -139,7 +139,7 @@ module inner_diffuser(radius, wall) {
         translate([0,0,-thickness-$o]) cylinder(r1=outer_r, r2=top_r, h=height);
         // Poke a tiny hole through the center of this to prevent it from closing off the
         // inner core of the diffuser such that some slicers would allow it to be filled in.
-        //cylinder(r=.0001, h=radius+$o);
+        translate([top_r,0,0]) cylinder(r=.0001, h=radius+$o);
     }
 }
 
