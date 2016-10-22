@@ -111,7 +111,7 @@ module dome_diffuser(radius, top_r, top_fillet, wall, height) {
                 }
             }
         }
-        // Chop off the bottom (and a bunch that might fall 
+        // Chop off the bottom so it doesn't interfere with the sleeve section.
         translate([0,0,-height]) cylinder(r=inner_r, h=height+$o);
     }
 }
